@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <menu>
   <item>
-    <path>civicrm/Showlocation</path>
-    <page_callback>CRM_Reservedloc_Page_Showlocation</page_callback>
-    <title>Showlocation</title>
+    <path>civicrm/EditLocation</path>
+    <page_callback>CRM_Reservedloc_Form_EditLocation</page_callback>
+    <title>EditLocation</title>
     <access_arguments>access CiviCRM</access_arguments>
   </item>
 </menu>

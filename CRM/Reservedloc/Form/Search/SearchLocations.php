@@ -15,6 +15,7 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
    * @return void
    */
   function buildForm(&$form) {
+
     CRM_Utils_System::setTitle(ts('Event Locations Listing'));
 
     $form->add('text','address_name',ts('Address Name'),TRUE);
@@ -48,6 +49,12 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
      * are part of the search criteria
      */
     $form->assign('elements', array('address_name','street_address','city','country', 'state_province',));
+
+    // var_dump($form);
+  }
+
+  public function buildTaskList(CRM_Core_Form_Search $form) {
+    return array();
   }
 
   /**
@@ -73,7 +80,7 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
   function &columns() {
     // return by reference
     $columns = array(
-      ts('Location Block Id') => 'location_block_id',
+      ts('Id') => 'location_block_id',
       ts('Address Name') => 'address_name',
       ts('Street Address') => 'street_address',
       ts('City') => 'city',
@@ -127,8 +134,8 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
     left join civicrm_address address on (loc_block.address_id = address.id )
     left join civicrm_email email on (loc_block.email_id = email.id)
     left join civicrm_phone phone on (loc_block.phone_id = phone.id)
-    inner join civicrm_state_province state on (address.`state_province_id` = state.`id`)
-    inner join civicrm_country country on (address.`country_id` = country.`id`)
+    left join civicrm_state_province state on (address.`state_province_id` = state.`id`)
+    left join civicrm_country country on (address.`country_id` = country.`id`)
     ";
   }
 
@@ -140,42 +147,81 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
    */
   function where($includeContactIDs = FALSE) {
     $params = array();
-    // $where = "contact_a.contact_type   = 'Household'";
+     $where = "";
 
     $count  = 1;
     $clause = array();
-    $address_name   = CRM_Utils_Array::value('address_name',
+
+    $form_value = null;
+
+    //address_name
+    $form_value   = CRM_Utils_Array::value('address_name',
       $this->_formValues
     );
-
-    if ($address_name != NULL) {
-      if (strpos($address_name, '%') === FALSE) {
-        $address_name = "%{$address_name}%";
+    if ($form_value != NULL) {
+      if (strpos($form_value, '%') === FALSE) {
+        $form_value = "%{$form_value}%";
       }
-      $params[$count] = array($address_name, 'String');
-      $clause[] = "address.name.address_name LIKE %{$count}";
+      $params[$count] = array($form_value, 'String');
+      $clause[] = "address.name LIKE %{$count}";
       $count++;
     }
 
-    $state = CRM_Utils_Array::value('state_province_id',
+    //street_address
+    $form_value   = CRM_Utils_Array::value('street_address',
       $this->_formValues
     );
-    if (!$state &&
-      $this->_stateID
-    ) {
-      $state = $this->_stateID;
+    if ($form_value != NULL) {
+      if (strpos($form_value, '%') === FALSE) {
+        $form_value = "%{$form_value}%";
+      }
+      $params[$count] = array($form_value, 'String');
+      $clause[] = "address.city LIKE %{$count}";
+      $count++;
     }
 
-    if ($state) {
-      $params[$count] = array($state, 'Integer');
-      $clause[] = "state_province.id = %{$count}";
+
+    //city
+    $form_value   = CRM_Utils_Array::value('city',
+      $this->_formValues
+    );
+    if ($form_value != NULL) {
+      if (strpos($form_value, '%') === FALSE) {
+        $form_value = "%{$form_value}%";
+      }
+      $params[$count] = array($form_value, 'String');
+      $clause[] = "address.street_address LIKE %{$count}";
+      $count++;
     }
+
+
+    //country
+    $form_value = CRM_Utils_Array::value('country',
+      $this->_formValues
+    );
+    if ($form_value) {
+      $params[$count] = array($form_value, 'Integer');
+      $clause[] = "country.id = %{$count}";
+      $count++;
+    }
+
+
+
+
+    $form_value = CRM_Utils_Array::value('state_province',
+      $this->_formValues
+    );
+    if ($form_value) {
+      $params[$count] = array($form_value, 'Integer');
+      $clause[] = "state.id = %{$count}";
+    }
+
+
 
     if (!empty($clause)) {
-      $where .= ' AND ' . implode(' AND ', $clause);
+      $where .=  implode(' AND ', $clause);
     }
 
-    return null;
 
     return $this->whereClause($where, $params);
   }
@@ -192,6 +238,7 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
    */
   function templateFile() {
 
+
     return 'CRM/Reservedloc/Form/Search/SearchLocations.tpl';
     // return 'CRM/Contact/Form/Search/Custom.tpl';
   }
@@ -201,13 +248,5 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
     return true;
   }
 
-  /**
-   * Modify the content of each row
-   *
-   * @param array $row modifiable SQL result row
-   * @return void
-   */
-  function alterRow(&$row) {
-    $row['sort_name'] .= ' ( altered )';
-  }
+
 }
