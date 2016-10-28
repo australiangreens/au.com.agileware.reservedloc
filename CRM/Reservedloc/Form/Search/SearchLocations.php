@@ -15,28 +15,39 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
    * @return void
    */
   function buildForm(&$form) {
-    CRM_Utils_System::setTitle(ts('My Search Title'));
+    CRM_Utils_System::setTitle(ts('Event Locations Listing'));
 
-    $form->add('text',
-      'household_name',
-      ts('Household Name'),
-      TRUE
-    );
+    $form->add('text','address_name',ts('Address Name'),TRUE);
 
-    $stateProvince = array('' => ts('- any state/province -')) + CRM_Core_PseudoConstant::stateProvince();
-    $form->addElement('select', 'state_province_id', ts('State/Province'), $stateProvince);
+    $form->add('text','street_address',ts('Street Address'),TRUE);
+
+    $form->add('text','city',ts('City'),TRUE);
+
+    $country = array('' => ts('- any country -')) + CRM_Core_PseudoConstant::country();
+    // $form->addElement('select', 'country', ts('Country'), $country);
+    $form->add('select', 'country', ts('Country') , $country, FALSE, array('class' => 'crm-select2'));
+
+    $element = $form->addChainSelect('state_province');
+    // $element->setMultiple(TRUE);
+
+
+    // $stateProvince = array('' => ts('- any state/province -')) + CRM_Core_PseudoConstant::stateProvince();
+    // $form->addElement('select', 'state_province_id', ts('State/Province'), $stateProvince);
 
     // Optionally define default search values
     $form->setDefaults(array(
-      'household_name' => '',
-      'state_province_id' => NULL,
+      'address_name' => '',
+      'street_address' => '',
+      'city' => '',
+      'country' => NULL,
+      // 'state_province' => NULL,
     ));
 
     /**
      * if you are using the standard template, this array tells the template what elements
      * are part of the search criteria
      */
-    $form->assign('elements', array('household_name', 'state_province_id'));
+    $form->assign('elements', array('address_name','street_address','city','country', 'state_province',));
   }
 
   /**
@@ -62,10 +73,12 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
   function &columns() {
     // return by reference
     $columns = array(
-      ts('Contact Id') => 'contact_id',
-      ts('Contact Type') => 'contact_type',
-      ts('Name') => 'sort_name',
-      ts('State') => 'state_province',
+      ts('Location Block Id') => 'location_block_id',
+      ts('Address Name') => 'address_name',
+      ts('Street Address') => 'street_address',
+      ts('City') => 'city',
+      ts('Country') => 'country',
+      ts('State/Province') => 'state',
     );
     return $columns;
   }
@@ -92,10 +105,14 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
    */
   function select() {
     return "
-      contact_a.id           as contact_id  ,
-      contact_a.contact_type as contact_type,
-      contact_a.sort_name    as sort_name,
-      state_province.name    as state_province
+    loc_block.id as location_block_id,
+    address.city as city,
+    state.name as state,
+    country.name as country,
+    email.email as email,
+    phone.phone as phone,
+    address.name as address_name,
+    address.street_address as street_address
     ";
   }
 
@@ -106,12 +123,12 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
    */
   function from() {
     return "
-      FROM      civicrm_contact contact_a
-      LEFT JOIN civicrm_address address ON ( address.contact_id       = contact_a.id AND
-                                             address.is_primary       = 1 )
-      LEFT JOIN civicrm_email           ON ( civicrm_email.contact_id = contact_a.id AND
-                                             civicrm_email.is_primary = 1 )
-      LEFT JOIN civicrm_state_province state_province ON state_province.id = address.state_province_id
+    from civicrm_loc_block loc_block
+    left join civicrm_address address on (loc_block.address_id = address.id )
+    left join civicrm_email email on (loc_block.email_id = email.id)
+    left join civicrm_phone phone on (loc_block.phone_id = phone.id)
+    inner join civicrm_state_province state on (address.`state_province_id` = state.`id`)
+    inner join civicrm_country country on (address.`country_id` = country.`id`)
     ";
   }
 
@@ -123,19 +140,20 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
    */
   function where($includeContactIDs = FALSE) {
     $params = array();
-    $where = "contact_a.contact_type   = 'Household'";
+    // $where = "contact_a.contact_type   = 'Household'";
 
     $count  = 1;
     $clause = array();
-    $name   = CRM_Utils_Array::value('household_name',
+    $address_name   = CRM_Utils_Array::value('address_name',
       $this->_formValues
     );
-    if ($name != NULL) {
-      if (strpos($name, '%') === FALSE) {
-        $name = "%{$name}%";
+
+    if ($address_name != NULL) {
+      if (strpos($address_name, '%') === FALSE) {
+        $address_name = "%{$address_name}%";
       }
-      $params[$count] = array($name, 'String');
-      $clause[] = "contact_a.household_name LIKE %{$count}";
+      $params[$count] = array($address_name, 'String');
+      $clause[] = "address.name.address_name LIKE %{$count}";
       $count++;
     }
 
@@ -157,7 +175,14 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
       $where .= ' AND ' . implode(' AND ', $clause);
     }
 
+    return null;
+
     return $this->whereClause($where, $params);
+  }
+
+
+  public function count() {
+    return CRM_Core_DAO::singleValueQuery($this->sql('count(distinct loc_block.id) as total'));
   }
 
   /**
@@ -168,7 +193,12 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
   function templateFile() {
 
     return 'CRM/Reservedloc/Form/Search/SearchLocations.tpl';
-    return 'CRM/Contact/Form/Search/Custom.tpl';
+    // return 'CRM/Contact/Form/Search/Custom.tpl';
+  }
+
+
+  public function validateUserSQL(&$sql, $onlyWhere = FALSE) {
+    return true;
   }
 
   /**
