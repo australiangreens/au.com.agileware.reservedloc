@@ -240,7 +240,7 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
 
 
     return 'CRM/Reservedloc/Form/Search/SearchLocations.tpl';
-    // return 'CRM/Contact/Form/Search/Custom.tpl';
+  
   }
 
 

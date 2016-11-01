@@ -153,3 +153,13 @@ function reservedloc_civicrm_navigationMenu(&$menu) {
   ));
   _reservedloc_civix_navigationMenu($menu);
 } // */
+/*
+*/
+
+
+
+function reservedloc_civicrm_permission(&$permissions) {
+  $prefix = ts('au.com.agileware.reservedloc') . ': '; // name of extension or module
+  $permissions['edit reserved locations'] = $prefix . ts('Edit reserved locations');
+
+}

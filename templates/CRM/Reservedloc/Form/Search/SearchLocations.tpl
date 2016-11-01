@@ -113,7 +113,7 @@
                         {assign var=fName value=$header.sort}
                             <td>{$row.$fName}</td>
                     {/foreach}
-                    <td><a href="{crmURL p="civicrm/EditLocation" q="block_id=`$row.location_block_id`" h=0}" class="action-item crm-hover-button no-popup">View</a></td>
+                    <td><a href="{crmURL p="civicrm/EditLocation" q="bid=`$row.location_block_id`" h=0}" class="action-item crm-hover-button no-popup">View</a></td>
                 </tr>
             {/foreach}
         </table>

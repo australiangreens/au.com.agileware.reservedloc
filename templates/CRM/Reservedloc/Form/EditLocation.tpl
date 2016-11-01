@@ -26,7 +26,11 @@
 {* this template used to build location block *}
 {if !$addBlock}
    <div id="help">
-        {ts}Use this form to configure the location and optional contact information for the event. This information will be displayed on the Event Information page. It will also be included in online registration pages and confirmation emails if these features are enabled.{/ts}
+    {if $message}
+      {$message}
+    {else}
+      {ts}TBA{/ts}
+    {/if}
     </div>
 {/if}
 
@@ -37,35 +41,6 @@
 <div class="crm-submit-buttons">
    {include file="CRM/common/formButtons.tpl" location="top"}
 </div>
-    {if $locEvents}
-      <table class="form-layout-compressed">
-      <tr id="optionType" class="crm-event-manage-location-form-block-location_option">
-        <td class="labels">
-          {$form.location_option.label}
-        </td>
-        {foreach from=$form.location_option key=key item =item}
-          {if $key|is_numeric}
-            <td class="value"><strong>{$item.html}</strong></td>
-            {/if}
-                {/foreach}
-       </tr>
-      <tr id="existingLoc" class="crm-event-manage-location-form-block-loc_event_id">
-        <td class="labels">
-          {$form.loc_event_id.label}
-        </td>
-        <td class="value" colspan="2">
-          {$form.loc_event_id.html|crmAddClass:huge}
-        </td>
-      </tr>
-      <tr>
-        <td id="locUsedMsg" colspan="3">
-        </td>
-      </tr>
-
-    </table>
-    {/if}
-
-
 
     <div id="newLocation">
       <h3>Address</h3>
@@ -78,26 +53,12 @@
     {* Display the phone block(s) *}
     {include file="CRM/Contact/Form/Edit/Phone.tpl"}
     </table>
-   <table class="form-layout-compressed">
-   <tr class="crm-event-is_show_location">
-    <td colspan="2">{$form.is_show_location.label}</td>
-    <td colspan="2">
-      {$form.is_show_location.html}<br />
-      <span class="description">{ts}Uncheck this box if you want to HIDE the event Address on Event Information and Registration pages as well as on email confirmations.{/ts}
-    </td>
-  </tr>
-  </table>
 <div class="crm-submit-buttons">
    {include file="CRM/common/formButtons.tpl" location="bottom"}
 </div>
 </div>
 
-{* Include Javascript to hide and display the appropriate blocks as directed by the php code *}
-{*include file="CRM/common/showHide.tpl"*}
-{if $locEvents}
-  {* include common additional blocks tpl *}
-  {include file="CRM/common/additionalBlocks.tpl"}
-
+{include file="CRM/common/additionalBlocks.tpl"}
 <script type="text/javascript">
 {literal}
 CRM.$(function($) {
@@ -201,6 +162,5 @@ CRM.$(function($) {
 });
 {/literal}
 </script>
-{/if}
 
 {/if} {* add block if end*}
