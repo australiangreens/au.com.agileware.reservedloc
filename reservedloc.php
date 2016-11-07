@@ -164,7 +164,7 @@ function reservedloc_civicrm_permission(&$permissions) {
 
 }
 
-//hook custom javascript into buidlform process.
+// //hook custom javascript into buidlform process.
 // function reservedloc_civicrm_buildForm($formName, &$form) {
 //   if ($formName == 'CRM_Event_Form_ManageEvent_Location') {
 //     CRM_Core_Resources::singleton()->addScriptFile('au.com.agileware.reservedloc', 'js/event-location-control.js', 20, 'page-footer');
@@ -187,6 +187,10 @@ function reservedloc_civicrm_pageRun(&$page) {
 function reservedloc_civicrm_validateForm( $formName, &$fields, &$files, &$form, &$errors ) {
 
   if($formName == 'CRM_Event_Form_ManageEvent_Location'){
+
+      // // for testing
+      // dpm( array('form element from para:'=>$form,'exportValues'=>$form->exportValues() ));
+      // return;
 
 
       $default_value = $form->_defaultValues;

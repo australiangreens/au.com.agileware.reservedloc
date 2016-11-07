@@ -1,7 +1,11 @@
 CRM.$(function($) {
 
-  //TODO initialization
   var confirmation_flag = true;
+
+  if($('#CIVICRM_QFID_1_location_option').is(':checked')){
+     confirmation_flag = false;
+   }
+
 
     //TODO really need to get this bit working properly
     $('#CIVICRM_QFID_1_location_option').on('click',function(event){
