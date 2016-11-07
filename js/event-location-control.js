@@ -38,12 +38,14 @@ CRM.$(function($) {
 
 
 
-
-
-
   function form_content_change_handler(){
 
-      var options =  {message:'Editing an existing location will create a new location for the current event.<br> The original location will not be changed.',options:{no: "Cancel the change",yes: "Continue"}};
+      var html_message = 'Editing an existing location will create a new location for the current event.<br> The original location will not be changed.';
+      var url = CRM.url('civicrm/EditLocation', {bid: $('#loc_event_id').val()});
+
+      html_message += '<br><br><br><a href="'+url+'">click here to edit current selected location</a>'
+
+      var options =  {message:html_message, options:{no: "Discard change",yes: "Continue"}};
 
       CRM.confirm(options)
       .on('crmConfirm:no', function(event) {
