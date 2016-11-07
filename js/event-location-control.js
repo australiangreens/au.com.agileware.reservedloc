@@ -7,28 +7,24 @@ CRM.$(function($) {
    }
 
 
-    //TODO really need to get this bit working properly
-    $('#CIVICRM_QFID_1_location_option').on('click',function(event){
-      //for testing
-      console.log('go');
+  $('#Address_Block_1').on('change.event_ui_modi',function(event){
+
+    if($('#CIVICRM_QFID_1_location_option').is(':checked')){
+       confirmation_flag = false;
+     }
+
+    if(confirmation_flag){
+
+      if(event.target.id == 'is_show_location'){
+        return;}
+
       confirmation_flag = false;
-    });
+      form_content_change_handler();
+
+    }
 
 
-    $('#Address_Block_1').on('change.event_ui_modi',function(event){
-
-      if(confirmation_flag){
-
-        if(event.target.id == 'is_show_location'){
-          return;}
-
-        confirmation_flag = false;
-        form_content_change_handler();
-
-      }
-
-
-    });
+  });
 
     $('#loc_event_id').on('change.event_ui_modi',function (){
       var form_input_elements = $('form#Location input,form#Location select');
