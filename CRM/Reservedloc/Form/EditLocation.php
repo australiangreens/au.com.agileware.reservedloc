@@ -207,7 +207,7 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
     $config = CRM_Core_Config::singleton();
     $this->postProcessHook();
 
-    //how to stay on the current page? or should we redirect users to other page?
+    //TODO how to stay on the current page? or should we redirect users to other page?
 
   }
 

@@ -163,3 +163,184 @@ function reservedloc_civicrm_permission(&$permissions) {
   $permissions['edit reserved locations'] = $prefix . ts('Edit reserved locations');
 
 }
+
+// function reservedloc_civicrm_buildForm($formName, &$form) {
+//   if ($formName == 'CRM_Event_Form_ManageEvent_Location') {
+//     CRM_Core_Resources::singleton()->addScriptFile('au.com.agileware.reservedloc', 'js/event-location-control.js', 20, 'page-footer');
+//   }
+// }
+
+function reservedloc_civicrm_pageRun(&$page) {
+  $pagename = $page->getVar('_name');
+  dpm(array($page,$pagename));
+
+  if($pagename == 'CRM_Event_Page_ManageEvent'){
+         CRM_Core_Resources::singleton()->addScriptFile('au.com.agileware.reservedloc', 'js/event-location-control.js', 20, 'page-footer');
+  }
+}
+
+
+function reservedloc_civicrm_validateForm( $formName, &$fields, &$files, &$form, &$errors ) {
+
+  if($formName == 'CRM_Event_Form_ManageEvent_Location'){
+
+      $default_value = $form->_defaultValues;
+      $submit_value = $form->exportValues();
+
+      if($submit_value['location_option'] == 2 && $submit_value['loc_event_id'] == $default_value['loc_block_id'] ){
+
+
+        compare_default_n_submit_value($default_value,$submit_value,$form);
+
+      }elseif ($submit_value['location_option'] == 2 && $submit_value['loc_event_id'] != $default_value['loc_block_id']) {
+
+        $default_value = array(
+          'address' => array(),
+          'email' => array(),
+          'phone' => array(),
+        );
+
+        $loc_block = civicrm_api3('LocBlock', 'getsingle', array('id' => $submit_value['loc_event_id'],));
+
+        if(!empty($loc_block['is_error'])){
+          CRM_Core_Error::fatal($loc_block['error_message']);
+        }else{
+          unset($loc_block['is_error']);
+        }
+
+        $tmp = array();
+
+        foreach ($loc_block as $field => $value) {
+
+          $tmp = explode("_", $field);
+
+          if(count($tmp) == 3){
+            unset($tmp[2]);
+          }elseif (count($tmp) == 2){
+            $tmp[1] = 1;
+          }else{
+            continue;
+          }
+
+          $result = civicrm_api3($tmp[0], 'getsingle', array('id' => $value,));
+
+          if( empty($result['is_error']) ){
+
+            unset($result['is_error']);
+
+          }else{
+            CRM_Core_Error::fatal($result['error_message']);
+          }
+
+
+          $default_value[strtolower($tmp[0])][$tmp[1]] = $result;
+
+        }
+
+        compare_default_n_submit_value($default_value,$submit_value,$form);
+      }
+
+      dpm(array('form element from para:'=>$form,'exportValues'=>$form->exportValues() ));
+
+      return;
+  }
+
+  return;
+
+
+}
+
+function compare_default_n_submit_value($default_value,$submit_value,&$form){
+
+          //   foreach (array('address','phone','email',) as $block){
+          //     foreach ($submit_value[$block] as $index => $values) {
+           //
+          //       foreach ($values as $key => $value) {
+           //
+          //         if(strrpos($key,'custom_') !== false){
+           //
+          //           $tmp = explode("_", $key);
+           //
+          //           $tmp = $tmp[0].'_'.$tmp[1];
+           //
+          //           if($key != $tmp){
+          //             $tmp2 = $value;
+           //
+          //             $form->_submitValues[$block][$index][$tmp] = $tmp2;
+           //
+          //             unset($form->_submitValues[$block][$index][$key]);
+           //
+          //           }else{
+          //               $tmp2 = $value;
+          //               $form->_submitValues[$block][$index][$tmp] = $tmp2;
+          //           }
+           //
+          //         }
+           //
+          //       }
+          //     }
+          //  }
+
+              foreach (array('address','phone','email',) as $block){
+
+                  foreach ($submit_value[$block] as $index => $values) {
+
+                    foreach ($values as $key => $value) {
+
+                      if(strrpos($key,'master_id') !== false){
+                        continue;
+                      }
+
+                      if(strrpos($key,'custom_') !== false){
+
+
+                        $tmp = explode("_", $key);
+
+                        //Note: custom field can only be added to the address, not email and phone.
+
+
+                          //check values of custom fields
+                          $query_array = array('entity_id' => $default_value[$block][$index]['id'],'entity_table' => 'civicrm_'.$block,'id'=>$tmp[1]);
+                          $result = civicrm_api3('CustomValue', 'get', $query_array);
+
+                          if( !empty($result['is_error'])){
+                            CRM_Core_Error::fatal($result['error_message']);
+                          }
+
+
+                          $default_value[$block][$index][$key] = $result['values'][$tmp[1]]['latest'];
+
+
+                      }
+
+
+                      if(isset($default_value[$block][$index][$key])){
+                        if($default_value[$block][$index][$key] == $value){
+                          continue;
+                        }else {
+                           $form->_submitValues['location_option'] = '1';
+                           CRM_Core_Session::setStatus('Difference in:'.$block.'.'.$index.'.'.$key);
+                           return;
+                        }
+                      }elseif (!isset($default_value[$block][$index][$key]) && $value != null && $key != 'phone_type_id') {
+                        $form->_submitValues['location_option'] = '1';
+                        CRM_Core_Session::setStatus('Difference in:'.$block.'.'.$index.'.'.$key);
+                        return;
+                      }
+                      continue;
+
+                    }
+
+                  }
+              }
+
+
+              if(!isset($submit_value['address'][1]['manual_geo_code'])  && $default_value['address'][1]['manual_geo_code'] != 0 ){
+                $form->_submitValues['location_option'] = '1';
+                CRM_Core_Session::setStatus('Difference in: manual_geo_code');
+              }
+
+              return;
+
+
+}
