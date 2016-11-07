@@ -3,11 +3,13 @@ CRM.$(function($) {
   //TODO initialization
   var confirmation_flag = true;
 
-
+    //TODO really need to get this bit working properly
     $('#CIVICRM_QFID_1_location_option').on('click',function(event){
+      //for testing
       console.log('go');
       confirmation_flag = false;
     });
+
 
     $('#Address_Block_1').on('change.event_ui_modi',function(event){
 
