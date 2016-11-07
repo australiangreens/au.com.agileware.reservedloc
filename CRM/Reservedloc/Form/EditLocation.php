@@ -90,8 +90,6 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
       $defaults['address'][1]['state_province_id'] = $config->defaultContactStateProvince;
     }
 
-    //  dpm($this);
-
 
      if (!CRM_Core_Permission::check('edit reserved locations')){
          $this->assign('message', 'No permission to edit');
@@ -180,6 +178,7 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
 
           $params[$blockName][$key]['id'] =  $id;
 
+          //going to update normal fields and custom fields seperately, so pop out all the custom fields
           $custom_fields_array = $this->pop_out_custom_fields($params[$blockName][$key]);
 
           //update normal fields on each block

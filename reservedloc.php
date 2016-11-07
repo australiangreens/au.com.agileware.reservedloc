@@ -164,12 +164,15 @@ function reservedloc_civicrm_permission(&$permissions) {
 
 }
 
+//hook custom javascript into buidlform process.
 // function reservedloc_civicrm_buildForm($formName, &$form) {
 //   if ($formName == 'CRM_Event_Form_ManageEvent_Location') {
 //     CRM_Core_Resources::singleton()->addScriptFile('au.com.agileware.reservedloc', 'js/event-location-control.js', 20, 'page-footer');
 //   }
 // }
 
+
+//TODO the javascript can not be loaded onto the page.
 function reservedloc_civicrm_pageRun(&$page) {
   $pagename = $page->getVar('_name');
   dpm(array($page,$pagename));
@@ -180,20 +183,22 @@ function reservedloc_civicrm_pageRun(&$page) {
 }
 
 
+//hook into the first step after the form has been submitted, as postprocess is too late for us to do stuff
 function reservedloc_civicrm_validateForm( $formName, &$fields, &$files, &$form, &$errors ) {
 
   if($formName == 'CRM_Event_Form_ManageEvent_Location'){
+
 
       $default_value = $form->_defaultValues;
       $submit_value = $form->exportValues();
 
       if($submit_value['location_option'] == 2 && $submit_value['loc_event_id'] == $default_value['loc_block_id'] ){
 
-
-        compare_default_n_submit_value($default_value,$submit_value,$form);
+      //if user did not select a different location block
+      compare_default_n_submit_value($default_value,$submit_value,$form);
 
       }elseif ($submit_value['location_option'] == 2 && $submit_value['loc_event_id'] != $default_value['loc_block_id']) {
-
+        //if user selected a different location block, getting all default values using api.
         $default_value = array(
           'address' => array(),
           'email' => array(),
@@ -208,6 +213,7 @@ function reservedloc_civicrm_validateForm( $formName, &$fields, &$files, &$form,
           unset($loc_block['is_error']);
         }
 
+        //standardizing the key names of the result.
         $tmp = array();
 
         foreach ($loc_block as $field => $value) {
@@ -240,7 +246,7 @@ function reservedloc_civicrm_validateForm( $formName, &$fields, &$files, &$form,
         compare_default_n_submit_value($default_value,$submit_value,$form);
       }
 
-      dpm(array('form element from para:'=>$form,'exportValues'=>$form->exportValues() ));
+      //dpm(array('form element from para:'=>$form,'exportValues'=>$form->exportValues() ));
 
       return;
   }
@@ -250,36 +256,9 @@ function reservedloc_civicrm_validateForm( $formName, &$fields, &$files, &$form,
 
 }
 
+//compare default form values (need to pass it into this function) and submit values to see if there is any change
 function compare_default_n_submit_value($default_value,$submit_value,&$form){
 
-          //   foreach (array('address','phone','email',) as $block){
-          //     foreach ($submit_value[$block] as $index => $values) {
-           //
-          //       foreach ($values as $key => $value) {
-           //
-          //         if(strrpos($key,'custom_') !== false){
-           //
-          //           $tmp = explode("_", $key);
-           //
-          //           $tmp = $tmp[0].'_'.$tmp[1];
-           //
-          //           if($key != $tmp){
-          //             $tmp2 = $value;
-           //
-          //             $form->_submitValues[$block][$index][$tmp] = $tmp2;
-           //
-          //             unset($form->_submitValues[$block][$index][$key]);
-           //
-          //           }else{
-          //               $tmp2 = $value;
-          //               $form->_submitValues[$block][$index][$tmp] = $tmp2;
-          //           }
-           //
-          //         }
-           //
-          //       }
-          //     }
-          //  }
 
               foreach (array('address','phone','email',) as $block){
 
@@ -296,21 +275,17 @@ function compare_default_n_submit_value($default_value,$submit_value,&$form){
 
                         $tmp = explode("_", $key);
 
-                        //Note: custom field can only be added to the address, not email and phone.
+
+                        //check values of custom fields
+                        $query_array = array('entity_id' => $default_value[$block][$index]['id'],'entity_table' => 'civicrm_'.$block,'id'=>$tmp[1]);
+                        $result = civicrm_api3('CustomValue', 'get', $query_array);
+
+                        if( !empty($result['is_error'])){
+                          CRM_Core_Error::fatal($result['error_message']);
+                        }
 
 
-                          //check values of custom fields
-                          $query_array = array('entity_id' => $default_value[$block][$index]['id'],'entity_table' => 'civicrm_'.$block,'id'=>$tmp[1]);
-                          $result = civicrm_api3('CustomValue', 'get', $query_array);
-
-                          if( !empty($result['is_error'])){
-                            CRM_Core_Error::fatal($result['error_message']);
-                          }
-
-
-                          $default_value[$block][$index][$key] = $result['values'][$tmp[1]]['latest'];
-
-
+                        $default_value[$block][$index][$key] = $result['values'][$tmp[1]]['latest'];
                       }
 
 
@@ -318,14 +293,25 @@ function compare_default_n_submit_value($default_value,$submit_value,&$form){
                         if($default_value[$block][$index][$key] == $value){
                           continue;
                         }else {
-                           $form->_submitValues['location_option'] = '1';
-                           CRM_Core_Session::setStatus('Difference in:'.$block.'.'.$index.'.'.$key);
-                           return;
+
+                          if($form->_submitValues['location_option'] != 1 ){
+
+                            $form->_submitValues['location_option'] = '1';
+                            CRM_Core_Session::setStatus('Difference in:'.$block.'.'.$index.'.'.$key);
+
+                          }
+
+
                         }
                       }elseif (!isset($default_value[$block][$index][$key]) && $value != null && $key != 'phone_type_id') {
-                        $form->_submitValues['location_option'] = '1';
-                        CRM_Core_Session::setStatus('Difference in:'.$block.'.'.$index.'.'.$key);
-                        return;
+
+                        if($form->_submitValues['location_option'] != 1 ){
+
+                          $form->_submitValues['location_option'] = '1';
+                          CRM_Core_Session::setStatus('Difference in:'.$block.'.'.$index.'.'.$key);
+
+                        }
+
                       }
                       continue;
 
@@ -339,6 +325,37 @@ function compare_default_n_submit_value($default_value,$submit_value,&$form){
                 $form->_submitValues['location_option'] = '1';
                 CRM_Core_Session::setStatus('Difference in: manual_geo_code');
               }
+
+              //trying to fix issue that the custom fields can not be saved when create a new location block.
+              // if($form->_submitValues['location_option'] == 1 ){
+              //
+              //     foreach (array('address','phone','email',) as $block){
+              //       foreach ($form->_submitValues[$block] as $index => $values) {
+              //
+              //         foreach ($values as $key => $value) {
+              //
+              //           if(strrpos($key,'custom_') !== false){
+              //
+              //             $tmp = explode("_", $key);
+              //
+              //             $tmp = $tmp[0].'_'.$tmp[1].'_-1';
+              //
+              //             if($key != $tmp){
+              //               $tmp2 = $value;
+              //
+              //               $form->_submitValues[$block][$index][$tmp] = $tmp2;
+              //
+              //               unset($form->_submitValues[$block][$index][$key]);
+              //
+              //             }
+              //
+              //           }
+              //
+              //         }
+              //       }
+              //    }
+              //
+              // }
 
               return;
 

@@ -25,15 +25,11 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
     $form->add('text','city',ts('City'),TRUE);
 
     $country = array('' => ts('- any country -')) + CRM_Core_PseudoConstant::country();
-    // $form->addElement('select', 'country', ts('Country'), $country);
+
     $form->add('select', 'country', ts('Country') , $country, FALSE, array('class' => 'crm-select2'));
 
     $element = $form->addChainSelect('state_province');
-    // $element->setMultiple(TRUE);
 
-
-    // $stateProvince = array('' => ts('- any state/province -')) + CRM_Core_PseudoConstant::stateProvince();
-    // $form->addElement('select', 'state_province_id', ts('State/Province'), $stateProvince);
 
     // Optionally define default search values
     $form->setDefaults(array(
@@ -41,7 +37,7 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
       'street_address' => '',
       'city' => '',
       'country' => NULL,
-      // 'state_province' => NULL,
+
     ));
 
     /**
@@ -50,7 +46,7 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
      */
     $form->assign('elements', array('address_name','street_address','city','country', 'state_province',));
 
-    // var_dump($form);
+  
   }
 
   public function buildTaskList(CRM_Core_Form_Search $form) {
@@ -240,7 +236,7 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
 
 
     return 'CRM/Reservedloc/Form/Search/SearchLocations.tpl';
-  
+
   }
 
 
