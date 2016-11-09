@@ -265,7 +265,6 @@ function compare_default_n_submit_value($default_value,$submit_value,&$form) {
 
   if(!isset($submit_value['address'][1]['manual_geo_code'])  && $default_value['address'][1]['manual_geo_code'] != 0 ) {
     $form->_submitValues['location_option'] = '1';
-    CRM_Core_Session::setStatus('Difference in: manual_geo_code');
   }
 
   //trying to fix issue that the custom fields can not be saved when create a new location block.
