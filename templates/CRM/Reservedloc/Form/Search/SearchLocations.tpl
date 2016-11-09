@@ -31,7 +31,7 @@
 
 <div class="crm-block crm-form-block crm-contact-custom-search-form-block">
 <div class="crm-accordion-wrapper crm-custom_search_form-accordion {if $rows}collapsed{/if}">
-  <a name="new_location"  href="{crmURL p="civicrm/EditLocation" h=0}" class="crm-form-submit" style="float: right; display: inline-block;" target="_self">Create a new location</a>
+    <a name="new_location"  href="{crmURL p="civicrm/EditLocation" h=0}" class="crm-form-submit" style="float: right; display: inline-block;" target="_self">Create a new location</a>
     <div class="crm-accordion-header crm-master-accordion-header" style="display: inline-block;">
       <p>{ts}Show Locations{/ts}</p>
     </div><!-- /.crm-accordion-header -->

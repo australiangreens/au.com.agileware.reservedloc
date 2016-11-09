@@ -15,24 +15,18 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
    * @return void
    */
   function buildForm(&$form) {
-
     CRM_Utils_System::setTitle(ts('Event Locations Listing'));
 
     $form->add('text','address_name',ts('Address Name'),TRUE);
-
     $form->add('text','street_address',ts('Street Address'),TRUE);
-
     $form->add('text','city',ts('City'),TRUE);
-
     $country = array('' => ts('- any country -')) + CRM_Core_PseudoConstant::country();
-
     $form->add('select', 'country', ts('Country') , $country, FALSE, array('class' => 'crm-select2'));
-
     $element = $form->addChainSelect('state_province');
 
-
     // Optionally define default search values
-    $form->setDefaults(array(
+    $form->setDefaults(
+      array(
       'address_name' => '',
       'street_address' => '',
       'city' => '',
@@ -45,8 +39,8 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
      */
     $form->assign('elements', array('address_name','street_address','city','country', 'state_province',));
 
-    if(isset($_REQUEST['csid']) ){
-      if(isset($_SESSION["loc_srch_qfkey"]) ){
+    if(isset($_REQUEST['csid'])) {
+      if(isset($_SESSION["loc_srch_qfkey"])) {
         unset($_SESSION["loc_srch_qfkey"]);
       }
       $_SESSION["loc_srch_csid"] = $_REQUEST['csid'];
@@ -78,18 +72,12 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
    * @return array, keys are printable column headers and values are SQL column names
    */
   function &columns() {
-
-    if(isset($_REQUEST['qfKey']) ){
-
-      if(isset($_SESSION["loc_srch_csid"])){
+    if(isset($_REQUEST['qfKey']) ) {
+      if(isset($_SESSION["loc_srch_csid"])) {
         unset($_SESSION["loc_srch_csid"]);
       }
-
       $_SESSION["loc_srch_qfkey"] = $_REQUEST['qfKey'];
     }
-
-
-
     // return by reference
     $columns = array(
       ts('Id') => 'location_block_id',
@@ -159,15 +147,13 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
    */
   function where($includeContactIDs = FALSE) {
     $params = array();
-     $where = "";
-
+    $where = "";
     $count  = 1;
     $clause = array();
-
     $form_value = null;
-
     //address_name
-    $form_value   = CRM_Utils_Array::value('address_name',
+    $form_value = CRM_Utils_Array::value(
+      'address_name',
       $this->_formValues
     );
     if ($form_value != NULL) {
@@ -178,9 +164,9 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
       $clause[] = "address.name LIKE %{$count}";
       $count++;
     }
-
     //street_address
-    $form_value   = CRM_Utils_Array::value('street_address',
+    $form_value   = CRM_Utils_Array::value(
+    'street_address',
       $this->_formValues
     );
     if ($form_value != NULL) {
@@ -191,10 +177,9 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
       $clause[] = "address.city LIKE %{$count}";
       $count++;
     }
-
-
     //city
-    $form_value   = CRM_Utils_Array::value('city',
+    $form_value   = CRM_Utils_Array::value(
+      'city',
       $this->_formValues
     );
     if ($form_value != NULL) {
@@ -205,10 +190,9 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
       $clause[] = "address.street_address LIKE %{$count}";
       $count++;
     }
-
-
     //country
-    $form_value = CRM_Utils_Array::value('country',
+    $form_value = CRM_Utils_Array::value(
+      'country',
       $this->_formValues
     );
     if ($form_value) {
@@ -216,28 +200,19 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
       $clause[] = "country.id = %{$count}";
       $count++;
     }
-
-
-
-
-    $form_value = CRM_Utils_Array::value('state_province',
+    $form_value = CRM_Utils_Array::value(
+      'state_province',
       $this->_formValues
     );
     if ($form_value) {
       $params[$count] = array($form_value, 'Integer');
       $clause[] = "state.id = %{$count}";
     }
-
-
-
     if (!empty($clause)) {
       $where .=  implode(' AND ', $clause);
     }
-
-
     return $this->whereClause($where, $params);
   }
-
 
   public function count() {
     return CRM_Core_DAO::singleValueQuery($this->sql('count(distinct loc_block.id) as total'));
@@ -249,12 +224,9 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
    * @return string, template path (findable through Smarty template path)
    */
   function templateFile() {
-
-
     return 'CRM/Reservedloc/Form/Search/SearchLocations.tpl';
 
   }
-
 
   public function validateUserSQL(&$sql, $onlyWhere = FALSE) {
     return true;

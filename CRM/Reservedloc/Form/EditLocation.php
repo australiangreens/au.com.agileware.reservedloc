@@ -14,69 +14,58 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
   public function preProcess() {
     parent::preProcess();
 
-
-    if(isset($_REQUEST['bid'])){
+    if(isset($_REQUEST['bid'])) {
       //TODO need to be sanitized
       $bid = $_REQUEST['bid'];
-
       $_SESSION['loc_edt_bid'] = $bid;
     }
     else {
       return;
     }
 
-    if(empty($this->_values) || isset($bid) ){
-
+    if(empty($this->_values) || isset($bid)) {
       $this->_values = array(
         'address' => array(),
         'email' => array(),
         'phone' => array(),
       );
 
-
       $loc_block = civicrm_api3('LocBlock', 'getsingle', array('id' => $bid,));
 
-      if(!empty($loc_block['is_error'])){
+      if(!empty($loc_block['is_error'])) {
         CRM_Core_Error::fatal($loc_block['error_message']);
-      }else{
+      }
+      else {
         unset($loc_block['is_error']);
       }
 
       $tmp = array();
 
       foreach ($loc_block as $field => $value) {
-
         $tmp = explode("_", $field);
-
-        if(count($tmp) == 3){
+        if(count($tmp) == 3) {
           unset($tmp[2]);
-        }elseif (count($tmp) == 2){
+        }
+        elseif (count($tmp) == 2) {
           $tmp[1] = 1;
-        }else{
+        }
+        else {
           continue;
         }
 
         $result = civicrm_api3($tmp[0], 'getsingle', array('id' => $value,));
 
-        if( empty($result['is_error']) ){
-
+        if( empty($result['is_error'])) {
           unset($result['is_error']);
-
-        }else{
+        }
+        else {
           CRM_Core_Error::fatal($result['error_message']);
         }
-
-
         $this->_values[strtolower($tmp[0])][$tmp[1]] = $result;
-
       }
-
       $this->set('values', $this->_values);
-
     }
-
   }
-
 
   public function setDefaultValues() {
 
@@ -92,21 +81,17 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
     }
 
 
-     if (!CRM_Core_Permission::check('edit reserved locations')){
+     if (!CRM_Core_Permission::check('edit reserved locations')) {
          $this->assign('message', 'No permission to edit');
-
          foreach (array_keys($this->_elements) as $key) {
            $this->_elements[$key]->freeze();
          }
        }
-
     return $defaults;
   }
 
 
   public function buildQuickForm() {
-
-
     //load form for child blocks
     if ($this->_addBlockName) {
       $className = "CRM_Contact_Form_Edit_{$this->_addBlockName}";
@@ -121,7 +106,6 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
     //fix for CRM-1971
     $this->assign('action', $this->_action);
 
-
     if (CRM_Core_Permission::check('edit reserved locations')) {
         $buttons = array(
           array(
@@ -133,17 +117,16 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
             'type' => 'cancel',
             'name' => ts('Cancel'),
           ),
-
         );
 
-        if(isset($_SESSION["loc_srch_qfkey"])){
+        if(isset($_SESSION["loc_srch_qfkey"])) {
           $this->assign('loc_srch_url', CRM_Utils_System::url('civicrm/contact/search/custom','qfKey='.$_SESSION["loc_srch_qfkey"],true));
-        }else if(isset($_SESSION["loc_srch_csid"])){
+        }
+        else if(isset($_SESSION["loc_srch_csid"])) {
           $this->assign('loc_srch_url', CRM_Utils_System::url('civicrm/contact/search/custom','csid='.$_SESSION["loc_srch_csid"].'&reset=1',true));
         }
 
         $this->assign('message', 'Permission of editting enabled');
-
         $this->addButtons($buttons);
 
         //TODO adding check box to see for location reservation.
@@ -155,37 +138,26 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
         //
         // $this->createElement('checkbox', $key, NULL, $var);
 
-
-      }else{
-
+      }
+      else {
         $buttons = array(
           array(
             'type' => 'back',
             'name' => ts('Back'),
           ),
         );
-
-
         $this->addButtons($buttons);
-
       }
   }
-
 
   public function postProcess() {
 
     $params = $this->exportValues();
 
-    // dpm(array('Export Values: '=>$params,'form'=>$this,'request'=>$_REQUEST));
-    // return;
-
-    if( !empty($this->_values) ){
+    if( !empty($this->_values)) {
       $custom_fields_array = array();
-
       foreach ($this->_values as $blockName => $block_value) {
-
         foreach ($block_value as $key => $value) {
-
             $custom_fields_array = array();
             $id = $value['id'];
 
@@ -197,86 +169,74 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
             //update normal fields on each block
             $result = civicrm_api3($blockName, 'create', $params[$blockName][$key] + array('contact_id'=>'','location_type_id'=>''));
 
-            if( !empty($result['is_error'])){
+            if( !empty($result['is_error'])) {
               CRM_Core_Error::fatal($result['error_message']);
             }
 
             //update custom fields on each block, if any
-            if(!empty($custom_fields_array)){
+            if(!empty($custom_fields_array)) {
               $query_array = array('entity_id' => $id,'entity_table' => "$blockName",) + $custom_fields_array;
               $result = civicrm_api3('CustomValue', 'create', $query_array);
 
-              if( !empty($result['is_error'])){
+              if( !empty($result['is_error'])) {
                 CRM_Core_Error::fatal($result['error_message']);
               }
             }
         }
       }
-
     }
     else {
-
-          $defaultLocationType = CRM_Core_BAO_LocationType::getDefault();
-          foreach (array(
-                     'address',
-                     'phone',
-                     'email',
-                   ) as $block) {
-            if (empty($params[$block]) || !is_array($params[$block])) {
-              continue;
-            }
-            foreach ($params[$block] as $count => & $values) {
-              if ($count == 1) {
-                $values['is_primary'] = 1;
-              }
-              $values['location_type_id'] = ($defaultLocationType->id) ? $defaultLocationType->id : 1;
-            }
+      $defaultLocationType = CRM_Core_BAO_LocationType::getDefault();
+      foreach (array('address','phone','email',) as $block) {
+        if (empty($params[$block]) || !is_array($params[$block])) {
+          continue;
+        }
+        foreach ($params[$block] as $count => & $values) {
+          if ($count == 1) {
+            $values['is_primary'] = 1;
           }
-
-          // create/update new blocks.
-          $location = CRM_Core_BAO_Location::create($params, TRUE, NULL);
-
-          $params_array = array();
-
-          foreach ($location as $blockName => $block) {
-            if (empty($block) || !is_array($block) || $blockName == 'openid') {
-              continue;
-            }
-
-            foreach ($block as $index => $values) {
-              $index = $index + 1;
-
-              if($index == 1){
-                $name = $blockName . '_id';
-              }else {
-                $name = $blockName.'_'. $index . '_id';
-              }
-              $params_array[$name] = $values->id;
-            }
-
-          }
-          $params_array["sequential"] = 1;
-
-          $result = civicrm_api3('LocBlock', 'create', $params_array);
-
-          $bid = $result['values'][0]['id'];
-
+          $values['location_type_id'] = ($defaultLocationType->id) ? $defaultLocationType->id : 1;
+        }
       }
 
+      // create/update new blocks.
+      $location = CRM_Core_BAO_Location::create($params, TRUE, NULL);
+
+      $params_array = array();
+
+      foreach ($location as $blockName => $block) {
+        if (empty($block) || !is_array($block) || $blockName == 'openid') {
+          continue;
+        }
+
+        foreach ($block as $index => $values) {
+          $index = $index + 1;
+          if($index == 1) {
+            $name = $blockName . '_id';
+          }
+          else {
+            $name = $blockName.'_'. $index . '_id';
+          }
+          $params_array[$name] = $values->id;
+        }
+      }
+      $params_array["sequential"] = 1;
+      $result = civicrm_api3('LocBlock', 'create', $params_array);
+      $bid = $result['values'][0]['id'];
+    }
 
     CRM_Core_Session::setStatus(ts("Location information has been saved."), ts('Saved'), 'success');
 
-    if(!isset($bid) ){
-       $bid = $_SESSION['loc_edt_bid'];
+    if(!isset($bid) ) {
+      $bid = $_SESSION['loc_edt_bid'];
     }
 
     CRM_Core_Session::singleton()->pushUserContext(CRM_Utils_System::url('civicrm/EditLocation','bid='.$bid));
-
   }
 
-  protected function pop_out_custom_fields(array &$input = array()){
+  protected function pop_out_custom_fields(array &$input = array()) {
 
-    if(empty($input) || gettype($input) != 'array'){
+    if(empty($input) || gettype($input) != 'array') {
       return false;
     }
 
@@ -293,15 +253,11 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
         $output[$tmp] = $value;
 
         unset($input[$key]);
-      }else {
+      }
+      else {
         continue;
       }
-
     }
-
     return $output;
   }
-
-
-
 }

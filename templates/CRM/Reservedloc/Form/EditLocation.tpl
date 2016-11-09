@@ -40,7 +40,9 @@
 <div class="crm-block crm-form-block crm-event-manage-location-form-block">
 <div class="crm-submit-buttons">
    {include file="CRM/common/formButtons.tpl" location="top"}
+  {if $loc_srch_url}
   <a class="crm-form-submit button"  href="{$loc_srch_url}" style="padding-top: 3px;padding-bottom: 3px;">Back to search result</a>
+  {/if}
 </div>
 
     <div id="newLocation">
