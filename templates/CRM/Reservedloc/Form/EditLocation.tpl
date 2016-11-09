@@ -40,6 +40,7 @@
 <div class="crm-block crm-form-block crm-event-manage-location-form-block">
 <div class="crm-submit-buttons">
    {include file="CRM/common/formButtons.tpl" location="top"}
+  <a class="crm-form-submit button"  href="{$loc_srch_url}" style="padding-top: 3px;padding-bottom: 3px;">Back to search result</a>
 </div>
 
     <div id="newLocation">
@@ -117,39 +118,6 @@ CRM.$(function($) {
     });
     return false;
   });
-
-  function showLocFields(clear) {
-    var createNew = document.getElementsByName("location_option")[0].checked;
-    if (createNew) {
-      $('#existingLoc', $form).hide();
-      //clear all location fields values.
-      if (clear !== false) {
-        $(":input[id *= 'address_1_'], :input[id *= 'email_1_'], :input[id *= 'phone_1_']", $form).val("").change();
-        {/literal}{if $config->defaultContactCountry}
-          {if $config->defaultContactStateProvince}
-            // Set default state once options are loaded
-            var defaultState = {$config->defaultContactStateProvince}
-            {literal}
-              $('#address_1_state_province_id', $form).one('crmOptionsUpdated', function() {
-                $(this).val(defaultState).change();
-              });
-            {/literal}
-          {/if}
-          // Set default country
-          $('#address_1_country_id', $form).val({$config->defaultContactCountry}).change();
-        {/if}{literal}
-      }
-      displayMessage(0);
-    } else {
-      $('#existingLoc', $form).show();
-      if (clear !== false) {
-        $('#loc_event_id', $form).change();
-      }
-    }
-  }
-
-  $('input[name=location_option]').click(showLocFields);
-  showLocFields(false);
 
   function displayMessage(count) {
     if (count) {

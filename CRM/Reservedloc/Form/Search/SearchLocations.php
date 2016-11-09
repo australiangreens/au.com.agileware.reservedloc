@@ -37,7 +37,6 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
       'street_address' => '',
       'city' => '',
       'country' => NULL,
-
     ));
 
     /**
@@ -46,7 +45,12 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
      */
     $form->assign('elements', array('address_name','street_address','city','country', 'state_province',));
 
-  
+    if(isset($_REQUEST['csid']) ){
+      if(isset($_SESSION["loc_srch_qfkey"]) ){
+        unset($_SESSION["loc_srch_qfkey"]);
+      }
+      $_SESSION["loc_srch_csid"] = $_REQUEST['csid'];
+    }
   }
 
   public function buildTaskList(CRM_Core_Form_Search $form) {
@@ -74,6 +78,18 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
    * @return array, keys are printable column headers and values are SQL column names
    */
   function &columns() {
+
+    if(isset($_REQUEST['qfKey']) ){
+
+      if(isset($_SESSION["loc_srch_csid"])){
+        unset($_SESSION["loc_srch_csid"]);
+      }
+
+      $_SESSION["loc_srch_qfkey"] = $_REQUEST['qfKey'];
+    }
+
+
+
     // return by reference
     $columns = array(
       ts('Id') => 'location_block_id',

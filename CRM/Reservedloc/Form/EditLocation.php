@@ -10,18 +10,19 @@ require_once 'CRM/Core/Form.php';
 class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Location {
 
 
+
   public function preProcess() {
     parent::preProcess();
 
 
-    if(isset($_GET['bid'])){
-      //need to be sanitized
-      $bid = $_GET['bid'];
+    if(isset($_REQUEST['bid'])){
+      //TODO need to be sanitized
+      $bid = $_REQUEST['bid'];
 
-    }else {
-      if (!$this->_values = $this->get('values')) {
-        CRM_Core_Error::fatal(ts('No location id provided!'));
-      }
+      $_SESSION['loc_edt_bid'] = $bid;
+    }
+    else {
+      return;
     }
 
     if(empty($this->_values) || isset($bid) ){
@@ -104,6 +105,8 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
 
 
   public function buildQuickForm() {
+
+
     //load form for child blocks
     if ($this->_addBlockName) {
       $className = "CRM_Contact_Form_Edit_{$this->_addBlockName}";
@@ -130,7 +133,14 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
             'type' => 'cancel',
             'name' => ts('Cancel'),
           ),
+
         );
+
+        if(isset($_SESSION["loc_srch_qfkey"])){
+          $this->assign('loc_srch_url', CRM_Utils_System::url('civicrm/contact/search/custom','qfKey='.$_SESSION["loc_srch_qfkey"],true));
+        }else if(isset($_SESSION["loc_srch_csid"])){
+          $this->assign('loc_srch_url', CRM_Utils_System::url('civicrm/contact/search/custom','csid='.$_SESSION["loc_srch_csid"].'&reset=1',true));
+        }
 
         $this->assign('message', 'Permission of editting enabled');
 
@@ -163,50 +173,104 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
 
 
   public function postProcess() {
+
     $params = $this->exportValues();
 
-    // dpm(array('Export Values: '=>$params,'This Value: '=>$this->_values));
+    // dpm(array('Export Values: '=>$params,'form'=>$this,'request'=>$_REQUEST));
+    // return;
 
-    $custom_fields_array = array();
+    if( !empty($this->_values) ){
+      $custom_fields_array = array();
 
-    foreach ($this->_values as $blockName => $block_value) {
+      foreach ($this->_values as $blockName => $block_value) {
 
-      foreach ($block_value as $key => $value) {
+        foreach ($block_value as $key => $value) {
 
-          $custom_fields_array = array();
-          $id = $value['id'];
+            $custom_fields_array = array();
+            $id = $value['id'];
 
-          $params[$blockName][$key]['id'] =  $id;
+            $params[$blockName][$key]['id'] =  $id;
 
-          //going to update normal fields and custom fields seperately, so pop out all the custom fields
-          $custom_fields_array = $this->pop_out_custom_fields($params[$blockName][$key]);
+            //going to update normal fields and custom fields seperately, so pop out all the custom fields
+            $custom_fields_array = $this->pop_out_custom_fields($params[$blockName][$key]);
 
-          //update normal fields on each block
-          $result = civicrm_api3($blockName, 'create', $params[$blockName][$key]);
-
-          if( !empty($result['is_error'])){
-            CRM_Core_Error::fatal($result['error_message']);
-          }
-
-          //update custom fields on each block, if any
-          if(!empty($custom_fields_array)){
-            $query_array = array('entity_id' => $id,'entity_table' => "$blockName",) + $custom_fields_array;
-            $result = civicrm_api3('CustomValue', 'create', $query_array);
+            //update normal fields on each block
+            $result = civicrm_api3($blockName, 'create', $params[$blockName][$key] + array('contact_id'=>'','location_type_id'=>''));
 
             if( !empty($result['is_error'])){
               CRM_Core_Error::fatal($result['error_message']);
             }
+
+            //update custom fields on each block, if any
+            if(!empty($custom_fields_array)){
+              $query_array = array('entity_id' => $id,'entity_table' => "$blockName",) + $custom_fields_array;
+              $result = civicrm_api3('CustomValue', 'create', $query_array);
+
+              if( !empty($result['is_error'])){
+                CRM_Core_Error::fatal($result['error_message']);
+              }
+            }
+        }
+      }
+
+    }
+    else {
+
+          $defaultLocationType = CRM_Core_BAO_LocationType::getDefault();
+          foreach (array(
+                     'address',
+                     'phone',
+                     'email',
+                   ) as $block) {
+            if (empty($params[$block]) || !is_array($params[$block])) {
+              continue;
+            }
+            foreach ($params[$block] as $count => & $values) {
+              if ($count == 1) {
+                $values['is_primary'] = 1;
+              }
+              $values['location_type_id'] = ($defaultLocationType->id) ? $defaultLocationType->id : 1;
+            }
           }
+
+          // create/update new blocks.
+          $location = CRM_Core_BAO_Location::create($params, TRUE, NULL);
+
+          $params_array = array();
+
+          foreach ($location as $blockName => $block) {
+            if (empty($block) || !is_array($block) || $blockName == 'openid') {
+              continue;
+            }
+
+            foreach ($block as $index => $values) {
+              $index = $index + 1;
+
+              if($index == 1){
+                $name = $blockName . '_id';
+              }else {
+                $name = $blockName.'_'. $index . '_id';
+              }
+              $params_array[$name] = $values->id;
+            }
+
+          }
+          $params_array["sequential"] = 1;
+
+          $result = civicrm_api3('LocBlock', 'create', $params_array);
+
+          $bid = $result['values'][0]['id'];
+
       }
 
 
+    CRM_Core_Session::setStatus(ts("Location information has been saved."), ts('Saved'), 'success');
+
+    if(!isset($bid) ){
+       $bid = $_SESSION['loc_edt_bid'];
     }
 
-    CRM_Core_Session::setStatus(ts("Location information has been saved."), ts('Saved'), 'success');
-    $config = CRM_Core_Config::singleton();
-    $this->postProcessHook();
-
-    //TODO how to stay on the current page? or should we redirect users to other page?
+    CRM_Core_Session::singleton()->pushUserContext(CRM_Utils_System::url('civicrm/EditLocation','bid='.$bid));
 
   }
 

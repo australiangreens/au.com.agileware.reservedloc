@@ -159,40 +159,31 @@ function reservedloc_civicrm_navigationMenu(&$menu) {
 
 
 function reservedloc_civicrm_permission(&$permissions) {
-  $prefix = ts('au.com.agileware.reservedloc') . ': '; // name of extension or module
-  $permissions['edit reserved locations'] = $prefix . ts('Edit reserved locations');
-
+  $permissions['edit reserved locations'] = ts('Reserved locations: Edit reserved locations');
 }
 
-// //hook custom javascript into buidlform process.
-// function reservedloc_civicrm_buildForm($formName, &$form) {
-//   if ($formName == 'CRM_Event_Form_ManageEvent_Location') {
-//     CRM_Core_Resources::singleton()->addScriptFile('au.com.agileware.reservedloc', 'js/event-location-control.js', 20, 'page-footer');
-//   }
-// }
+//hook custom javascript into buidlform process.
+function reservedloc_civicrm_buildForm($formName, &$form) {
 
 
-//TODO the javascript can not be loaded onto the page.
-function reservedloc_civicrm_pageRun(&$page) {
-  $pagename = $page->getVar('_name');
-  dpm(array($page,$pagename));
+  if ($formName == 'CRM_Event_Form_ManageEvent_Location') {
 
-  if($pagename == 'CRM_Event_Page_ManageEvent'){
-         CRM_Core_Resources::singleton()->addScriptFile('au.com.agileware.reservedloc', 'js/event-location-control.js', 20, 'page-footer');
+    if($_REQUEST['snippet'] == 'json' && $_REQUEST['component'] == 'event'){
+
+      CRM_Core_Resources::singleton()->addScriptFile('au.com.agileware.reservedloc', 'js/event-location-control.js', 0, 'page-footer');
+    }
+
   }
+
+
 }
+
 
 
 //hook into the first step after the form has been submitted, as postprocess is too late for us to do stuff
 function reservedloc_civicrm_validateForm( $formName, &$fields, &$files, &$form, &$errors ) {
 
   if($formName == 'CRM_Event_Form_ManageEvent_Location'){
-
-      // // for testing
-      // dpm( array('form element from para:'=>$form,'exportValues'=>$form->exportValues() ));
-      // return;
-
-
       $default_value = $form->_defaultValues;
       $submit_value = $form->exportValues();
 
@@ -213,7 +204,8 @@ function reservedloc_civicrm_validateForm( $formName, &$fields, &$files, &$form,
 
         if(!empty($loc_block['is_error'])){
           CRM_Core_Error::fatal($loc_block['error_message']);
-        }else{
+        }
+        else {
           unset($loc_block['is_error']);
         }
 
@@ -234,17 +226,10 @@ function reservedloc_civicrm_validateForm( $formName, &$fields, &$files, &$form,
 
           $result = civicrm_api3($tmp[0], 'getsingle', array('id' => $value,));
 
-          if( empty($result['is_error']) ){
-
+          if(isset($result['is_error'])) {
             unset($result['is_error']);
-
-          }else{
-            CRM_Core_Error::fatal($result['error_message']);
           }
-
-
           $default_value[strtolower($tmp[0])][$tmp[1]] = $result;
-
         }
 
         compare_default_n_submit_value($default_value,$submit_value,$form);

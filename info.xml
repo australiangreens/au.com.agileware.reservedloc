@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <extension key="au.com.agileware.reservedloc" type="module">
   <file>reservedloc</file>
-  <name>au.com.agileware.reservedloc</name>
+  <name>Reserved locations</name>
   <description>FIXME</description>
   <license>AGPL-3.0</license>
   <maintainer>

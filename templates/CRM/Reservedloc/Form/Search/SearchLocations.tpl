@@ -23,13 +23,17 @@
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
 *}
+
+
 {* Default template custom searches. This template is used automatically if templateFile() function not defined in
    custom search .php file. If you want a different layout, clone and customize this file and point to new file using
    templateFile() function.*}
+
 <div class="crm-block crm-form-block crm-contact-custom-search-form-block">
 <div class="crm-accordion-wrapper crm-custom_search_form-accordion {if $rows}collapsed{/if}">
-    <div class="crm-accordion-header crm-master-accordion-header">
-      {ts}Show Locations{/ts}
+  <a name="new_location"  href="{crmURL p="civicrm/EditLocation" h=0}" class="crm-form-submit" style="float: right; display: inline-block;" target="_self">Create a new location</a>
+    <div class="crm-accordion-header crm-master-accordion-header" style="display: inline-block;">
+      <p>{ts}Show Locations{/ts}</p>
     </div><!-- /.crm-accordion-header -->
     <div class="crm-accordion-body">
         <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="top"}</div>
@@ -52,6 +56,7 @@
     </div><!-- /.crm-accordion-body -->
 </div><!-- /.crm-accordion-wrapper -->
 </div><!-- /.crm-form-block -->
+
 
 {if $rowsEmpty || $rows}
 <div class="crm-content-block">
