@@ -80,13 +80,12 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
       $defaults['address'][1]['state_province_id'] = $config->defaultContactStateProvince;
     }
 
-
-     if (!CRM_Core_Permission::check('edit reserved locations')) {
-         $this->assign('message', 'No permission to edit');
-         foreach (array_keys($this->_elements) as $key) {
-           $this->_elements[$key]->freeze();
-         }
-       }
+    if (!CRM_Core_Permission::check('edit reserved locations')) {
+      $this->assign('message', 'No permission to edit');
+      foreach (array_keys($this->_elements) as $key) {
+        $this->_elements[$key]->freeze();
+      }
+    }
     return $defaults;
   }
 
@@ -119,34 +118,23 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
           ),
         );
 
-        if(isset($_SESSION["loc_srch_qfkey"])) {
-          $this->assign('loc_srch_url', CRM_Utils_System::url('civicrm/contact/search/custom','qfKey='.$_SESSION["loc_srch_qfkey"],true));
-        }
-        else if(isset($_SESSION["loc_srch_csid"])) {
-          $this->assign('loc_srch_url', CRM_Utils_System::url('civicrm/contact/search/custom','csid='.$_SESSION["loc_srch_csid"].'&reset=1',true));
-        }
-
         $this->assign('message', 'Permission of editting enabled');
         $this->addButtons($buttons);
 
-        //TODO adding check box to see for location reservation.
-        // $this->addCheckBox('location_reserved', ts('Is location reserved?'),
-        //   CRM_Core_OptionGroup::values('recur_frequency_units', FALSE, FALSE, TRUE),
-        //   NULL, NULL, NULL, NULL,
-        //   array('&nbsp;&nbsp;', '&nbsp;&nbsp;', '&nbsp;&nbsp;', '<br/>'), TRUE
-        // );
-        //
-        // $this->createElement('checkbox', $key, NULL, $var);
+
+        // $this->addCheckBox('location_reserved', ts('Is location reserved?'),array());
 
       }
       else {
-        $buttons = array(
-          array(
-            'type' => 'back',
-            'name' => ts('Back'),
-          ),
-        );
-        $this->addButtons($buttons);
+        $this->assign('message', 'Permission of editting disabled');
+
+      }
+
+      if(isset($_SESSION["loc_srch_qfkey"])) {
+        $this->assign('loc_srch_url', CRM_Utils_System::url('civicrm/contact/search/custom','qfKey='.$_SESSION["loc_srch_qfkey"],true));
+      }
+      else if(isset($_SESSION["loc_srch_csid"])) {
+        $this->assign('loc_srch_url', CRM_Utils_System::url('civicrm/contact/search/custom','csid='.$_SESSION["loc_srch_csid"].'&reset=1',true));
       }
   }
 
