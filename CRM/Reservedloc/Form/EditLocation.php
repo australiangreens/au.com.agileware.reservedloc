@@ -8,9 +8,6 @@ require_once 'CRM/Core/Form.php';
  * @see http://wiki.civicrm.org/confluence/display/CRMDOC43/QuickForm+Reference
  */
 class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Location {
-
-
-
   public function preProcess() {
     parent::preProcess();
 
@@ -68,7 +65,6 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
   }
 
   public function setDefaultValues() {
-
     $defaults = $this->_values;
 
     $config = CRM_Core_Config::singleton();
@@ -88,7 +84,6 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
     }
     return $defaults;
   }
-
 
   public function buildQuickForm() {
     //load form for child blocks
@@ -139,7 +134,6 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
   }
 
   public function postProcess() {
-
     $params = $this->exportValues();
 
     if( !empty($this->_values)) {
@@ -223,7 +217,6 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
   }
 
   protected function pop_out_custom_fields(array &$input = array()) {
-
     if(empty($input) || gettype($input) != 'array') {
       return false;
     }

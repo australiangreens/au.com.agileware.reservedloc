@@ -156,13 +156,22 @@ function reservedloc_civicrm_navigationMenu(&$menu) {
 /*
 */
 
-
-
+/**
+ * Implements hook_civicrm_permission().
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_permission
+ */
 function reservedloc_civicrm_permission(&$permissions) {
   $permissions['edit reserved locations'] = ts('Reserved locations: Edit reserved locations');
 }
 
-//hook custom javascript into buidlform process.
+/**
+ * Implements hook_civicrm_buildForm().
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_buildForm
+ *
+ * Add custom javascript onto Event Location form
+ */
 function reservedloc_civicrm_buildForm($formName, &$form) {
   if ($formName == 'CRM_Event_Form_ManageEvent_Location') {
     if($_REQUEST['snippet'] == 'json' && $_REQUEST['component'] == 'event'){
@@ -171,7 +180,14 @@ function reservedloc_civicrm_buildForm($formName, &$form) {
   }
 }
 
-//hook into the first step after the form has been submitted, as postprocess is too late for us to do stuff
+/**
+ * Implements hook_civicrm_validateForm().
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_validateForm
+ *
+ * hook into the first step after the form has been submitted, as postprocess is
+ * too late for us to do stuff.
+ */
 function reservedloc_civicrm_validateForm( $formName, &$fields, &$files, &$form, &$errors ) {
   if($formName == 'CRM_Event_Form_ManageEvent_Location') {
       $default_value = $form->_defaultValues;
@@ -226,7 +242,10 @@ function reservedloc_civicrm_validateForm( $formName, &$fields, &$files, &$form,
   return;
 }
 
-//compare default form values (need to pass it into this function) and submit values to see if there is any change
+/*
+ * compare default form values (need to pass it into this function) and submit
+ * values to see if there is any change
+ */
 function compare_default_n_submit_value($default_value,$submit_value,&$form) {
   foreach (array('address','phone','email',) as $block) {
     foreach ($submit_value[$block] as $index => $values) {
