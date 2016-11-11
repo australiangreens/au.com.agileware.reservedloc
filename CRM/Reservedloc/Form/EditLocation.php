@@ -100,7 +100,8 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
     //fix for CRM-1971
     $this->assign('action', $this->_action);
 
-    if (CRM_Core_Permission::check('edit reserved locations')) {
+    /* Disabled permission check as reserved locations are not implemented.
+       if (CRM_Core_Permission::check('edit reserved locations')) {
         $buttons = array(
           array(
             'type' => 'upload',
@@ -123,7 +124,7 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
       else {
         $this->assign('message', 'Permission of editting disabled');
 
-      }
+      } */
 
       if(isset($_SESSION["loc_srch_qfkey"])) {
         $this->assign('loc_srch_url', CRM_Utils_System::url('civicrm/contact/search/custom','qfKey='.$_SESSION["loc_srch_qfkey"],true));
