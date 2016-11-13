@@ -11,9 +11,7 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
   public function preProcess() {
     parent::preProcess();
 
-    if(isset($_REQUEST['bid'])) {
-      //TODO need to be sanitized
-      $bid = $_REQUEST['bid'];
+    if($bid = CRM_Utils_Request::retrieve('bid', 'Int')) {
       $_SESSION['loc_edt_bid'] = $bid;
     }
     else {
