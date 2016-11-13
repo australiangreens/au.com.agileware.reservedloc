@@ -15,6 +15,7 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
       $_SESSION['loc_edt_bid'] = $bid;
     }
     else {
+      CRM_Utils_System::setTitle(ts('New Location'));
       return;
     }
 
@@ -49,6 +50,10 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
         }
 
         $result = civicrm_api3($tmp[0], 'getsingle', array('id' => $value,));
+
+        if($tmp[0] == 'address') {
+          CRM_Utils_System::setTitle(ts('Edit Location - %1', array(1 => $result['name'])));
+        }
 
         if( empty($result['is_error'])) {
           unset($result['is_error']);
@@ -240,4 +245,14 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
     }
     return $output;
   }
+
+  /**
+   * Return a descriptive name for the page, used in wizard header
+   *
+   * @return string
+   */
+  public function getTitle() {
+    return ts('Edit Location');
+  }
+
 }
