@@ -162,7 +162,7 @@ function reservedloc_civicrm_navigationMenu(&$menu) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_permission
  */
 function reservedloc_civicrm_permission(&$permissions) {
-  $permissions['edit reserved locations'] = ts('Reserved locations: Edit reserved locations');
+  $permissions['edit locations'] = ts('Locations: Edit locations');
 }
 
 /**
