@@ -15,7 +15,12 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
    * @return void
    */
   function buildForm(&$form) {
-    CRM_Utils_System::setTitle(ts('Event Locations Listing'));
+
+    $title = ts('Locations Listing');
+
+    CRM_Utils_System::setTitle($title);
+
+    $form->assign('loc_srch_title', $title);
 
     $form->add('text','address_name',ts('Address Name'),TRUE);
     $form->add('text','street_address',ts('Street Address'),TRUE);

@@ -24,6 +24,19 @@
  +--------------------------------------------------------------------+
 *}
 
+<script type="text/javascript">
+{literal}
+CRM.$(function($) {
+  var title = {/literal}"{$loc_srch_title}"{literal};
+
+  if(title.length){
+      document.title = title;
+  }
+
+});
+{/literal}
+</script>
+
 
 {* Default template custom searches. This template is used automatically if templateFile() function not defined in
    custom search .php file. If you want a different layout, clone and customize this file and point to new file using
