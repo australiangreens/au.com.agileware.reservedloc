@@ -23,6 +23,7 @@
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
 *}
+
 {* this template used to build location block *}
 {if !$addBlock}
    <div id="help">
@@ -65,6 +66,14 @@
 <script type="text/javascript">
 {literal}
 CRM.$(function($) {
+
+  var title = {/literal}"{$loc_edit_title}"{literal};
+
+  if(title.length){
+      document.title = title;
+  }
+
+
   //FIX ME: by default load 2 blocks and hide add and delete links
   //we should make additional block function more flexible to set max block limit
   buildBlocks('Email');

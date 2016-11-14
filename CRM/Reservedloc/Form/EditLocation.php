@@ -13,9 +13,16 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
 
     if($bid = CRM_Utils_Request::retrieve('bid', 'Int')) {
       $_SESSION['loc_edt_bid'] = $bid;
+
+      $this->assign('loc_edit_title',ts('Edit Location'));
     }
     else {
-      CRM_Utils_System::setTitle(ts('New Location'));
+      $title = ts('New Location');
+
+      CRM_Utils_System::setTitle($title);
+
+      $this->assign('loc_edit_title',$title);
+
       return;
     }
 
