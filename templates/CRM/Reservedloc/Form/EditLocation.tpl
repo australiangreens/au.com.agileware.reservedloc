@@ -26,13 +26,11 @@
 
 {* this template used to build location block *}
 {if !$addBlock}
-   <div id="help">
-    {if $message}
+  {if $message}
+    <div id="help">
       {$message}
-    {else}
-      {ts}TBA{/ts}
-    {/if}
     </div>
+  {/if}
 {/if}
 
 {if $addBlock}

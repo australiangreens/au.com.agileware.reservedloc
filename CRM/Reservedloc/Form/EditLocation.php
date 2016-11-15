@@ -87,7 +87,7 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
     }
 
     if (!CRM_Core_Permission::check('edit locations')) {
-      $this->assign('message', 'No permission to edit');
+      //$this->assign('message', 'No permission to edit');
       foreach (array_keys($this->_elements) as $key) {
         $this->_elements[$key]->freeze();
       }
@@ -124,7 +124,7 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
           ),
         );
 
-        $this->assign('message', 'Permission of editting enabled');
+        //$this->assign('message', 'Permission of editting enabled');
         $this->addButtons($buttons);
 
 
@@ -132,7 +132,7 @@ class CRM_Reservedloc_Form_EditLocation extends CRM_Event_Form_ManageEvent_Locat
 
       }
       else {
-        $this->assign('message', 'Permission of editting disabled');
+        //$this->assign('message', 'Permission of editting disabled');
 
       }
 
