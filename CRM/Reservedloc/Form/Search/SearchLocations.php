@@ -179,11 +179,11 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
         $form_value = "%{$form_value}%";
       }
       $params[$count] = array($form_value, 'String');
-      $clause[] = "address.city LIKE %{$count}";
+      $clause[] = "address.street_address LIKE %{$count}";
       $count++;
     }
     //city
-    $form_value   = CRM_Utils_Array::value(
+    $form_value = CRM_Utils_Array::value(
       'city',
       $this->_formValues
     );
@@ -192,7 +192,7 @@ class CRM_Reservedloc_Form_Search_SearchLocations extends CRM_Contact_Form_Searc
         $form_value = "%{$form_value}%";
       }
       $params[$count] = array($form_value, 'String');
-      $clause[] = "address.street_address LIKE %{$count}";
+      $clause[] = "address.city LIKE %{$count}";
       $count++;
     }
     //country

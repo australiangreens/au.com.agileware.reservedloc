@@ -46,7 +46,7 @@ CRM.$(function($) {
 <div class="crm-accordion-wrapper crm-custom_search_form-accordion {if $rows}collapsed{/if}">
     <a name="new_location"  href="{crmURL p="civicrm/EditLocation" h=0}" class="crm-form-submit" style="float: right; display: inline-block;" target="_self">Create a new location</a>
     <div class="crm-accordion-header crm-master-accordion-header" style="display: inline-block;">
-      <p>{ts}Show Locations{/ts}</p>
+      <p>{ts}Find Locations{/ts}</p>
     </div><!-- /.crm-accordion-header -->
     <div class="crm-accordion-body">
         <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="top"}</div>
@@ -131,7 +131,7 @@ CRM.$(function($) {
                         {assign var=fName value=$header.sort}
                             <td>{$row.$fName}</td>
                     {/foreach}
-                    <td><a href="{crmURL p="civicrm/EditLocation" q="bid=`$row.location_block_id`" h=0}" class="action-item crm-hover-button no-popup">View</a></td>
+                    <td><a href="{crmURL p="civicrm/EditLocation" q="bid=`$row.location_block_id`" h=0}" class="action-item crm-hover-button no-popup">Edit</a></td>
                 </tr>
             {/foreach}
         </table>
