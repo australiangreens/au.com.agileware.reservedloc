@@ -174,135 +174,29 @@ function reservedloc_civicrm_permission(&$permissions) {
  */
 function reservedloc_civicrm_buildForm($formName, &$form) {
   if ($formName == 'CRM_Event_Form_ManageEvent_Location') {
-    if($_REQUEST['snippet'] == 'json' && $_REQUEST['component'] == 'event'){
-      CRM_Core_Resources::singleton()->addScriptFile('au.com.agileware.reservedloc', 'js/event-location-control.js', 0, 'page-footer');
+    $defaults = array();
+    if ($form->elementExists('location_option')) {
+      // Reset the location option to create a new LocBlock every time.
+      $form->removeElement('location_option');
+      $form->addElement('hidden', 'location_option');
+      $form->getElement('location_option')->setValue(1);
+      $defaults['location_option'] = 1;
+    }
+
+    if($form->elementExists('loc_event_id')) {
+      // Remove the location selector.
+      $form->removeElement('loc_event_id');
+    }
+
+    // Ensure locUsed is 0, otherwise we get confusing output.
+    $form->assign('locUsed', 0);
+
+    // Actually, remove the entire block.
+    $form->assign('locEvents', FALSE);
+
+    // Overwrite the applicable (location_option) default values.
+    if(!empty($default)) {
+      $form->setDefaults($defaults);
     }
   }
-}
-
-/**
- * Implements hook_civicrm_validateForm().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_validateForm
- *
- * hook into the first step after the form has been submitted, as postprocess is
- * too late for us to do stuff.
- */
-function reservedloc_civicrm_validateForm( $formName, &$fields, &$files, &$form, &$errors ) {
-  if($formName == 'CRM_Event_Form_ManageEvent_Location') {
-      $default_value = $form->_defaultValues;
-      $submit_value = $form->exportValues();
-
-      if($submit_value['location_option'] == 2 && $submit_value['loc_event_id'] == $default_value['loc_block_id']) {
-        //if user did not select a different location block
-        compare_default_n_submit_value($default_value,$submit_value,$form);
-      }
-      elseif ($submit_value['location_option'] == 2 && $submit_value['loc_event_id'] != $default_value['loc_block_id']) {
-        //if user selected a different location block, getting all default values using api.
-        $default_value = array(
-          'address' => array(),
-          'email' => array(),
-          'phone' => array(),
-        );
-
-        $loc_block = civicrm_api3('LocBlock', 'getsingle', array('id' => $submit_value['loc_event_id'],));
-
-        if(!empty($loc_block['is_error'])) {
-          CRM_Core_Error::fatal($loc_block['error_message']);
-        }
-        else {
-          unset($loc_block['is_error']);
-        }
-
-        //standardizing the key names of the result.
-        $tmp = array();
-        foreach ($loc_block as $field => $value) {
-          $tmp = explode("_", $field);
-          if(count($tmp) == 3) {
-            unset($tmp[2]);
-          }
-          elseif (count($tmp) == 2) {
-            $tmp[1] = 1;
-          }
-          else {
-            continue;
-          }
-
-          $result = civicrm_api3($tmp[0], 'getsingle', array('id' => $value,));
-
-          if(isset($result['is_error'])) {
-            unset($result['is_error']);
-          }
-          $default_value[strtolower($tmp[0])][$tmp[1]] = $result;
-        }
-        compare_default_n_submit_value($default_value,$submit_value,$form);
-      }
-      return;
-  }
-  return;
-}
-
-/*
- * compare default form values (need to pass it into this function) and submit
- * values to see if there is any change
- */
-function compare_default_n_submit_value($default_value,$submit_value,&$form) {
-  foreach (array('address','phone','email',) as $block) {
-    foreach ($submit_value[$block] as $index => $values) {
-      foreach ($values as $key => $value) {
-        if(strrpos($key,'master_id') !== false) {
-          continue;
-        }
-
-        if(strrpos($key,'custom_') !== false) {
-          $tmp = explode("_", $key);
-          //check values of custom fields
-          $query_array = array('entity_id' => $default_value[$block][$index]['id'],'entity_table' => 'civicrm_'.$block,'id'=>$tmp[1]);
-          $result = civicrm_api3('CustomValue', 'get', $query_array);
-
-          if( !empty($result['is_error'])) {
-            CRM_Core_Error::fatal($result['error_message']);
-          }
-          $default_value[$block][$index][$key] = $result['values'][$tmp[1]]['latest'];
-        }
-
-        if(isset($default_value[$block][$index][$key])) {
-          if($default_value[$block][$index][$key] == $value) {
-            continue;
-          }
-          else {
-              $form->_submitValues['location_option'] = '1';
-          }
-        }
-        elseif (!isset($default_value[$block][$index][$key]) && $value != null && $key != 'phone_type_id') {
-            $form->_submitValues['location_option'] = '1';
-        }
-        continue;
-      }
-    }
-  }
-
-  if(!isset($submit_value['address'][1]['manual_geo_code'])  && $default_value['address'][1]['manual_geo_code'] != 0 ) {
-    $form->_submitValues['location_option'] = '1';
-  }
-
-  //trying to fix issue that the custom fields can not be saved when create a new location block.
-  // if($form->_submitValues['location_option'] == 1) {
-  //     foreach (array('address','phone','email',) as $block) {
-  //       foreach ($form->_submitValues[$block] as $index => $values) {
-  //         foreach ($values as $key => $value) {
-  //           if(strrpos($key,'custom_') !== false) {
-  //             $tmp = explode("_", $key);
-  //             $tmp = $tmp[0].'_'.$tmp[1].'_-1';
-  //             if($key != $tmp) {
-  //               $tmp2 = $value;
-  //               $form->_submitValues[$block][$index][$tmp] = $tmp2;
-  //               unset($form->_submitValues[$block][$index][$key]);
-  //             }
-  //           }
-  //         }
-  //       }
-  //    }
-  // }
-  return;
 }
