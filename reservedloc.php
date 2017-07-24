@@ -170,7 +170,7 @@ function reservedloc_civicrm_permission(&$permissions) {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_buildForm
  *
- * Add custom javascript onto Event Location form
+ * Force the location option to always be "Create new location"
  */
 function reservedloc_civicrm_buildForm($formName, &$form) {
   if ($formName == 'CRM_Event_Form_ManageEvent_Location') {
@@ -178,10 +178,11 @@ function reservedloc_civicrm_buildForm($formName, &$form) {
     if ($form->elementExists('location_option')) {
       // Reset the location option to create a new LocBlock every time.
       $form->removeElement('location_option');
-      $form->addElement('hidden', 'location_option');
-      $form->getElement('location_option')->setValue(1);
-      $defaults['location_option'] = 1;
     }
+
+    $form->addElement('hidden', 'location_option');
+    $form->getElement('location_option')->setValue(1);
+    $defaults['location_option'] = 1;
 
     if($form->elementExists('loc_event_id')) {
       // Remove the location selector.
