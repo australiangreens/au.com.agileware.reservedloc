@@ -189,6 +189,13 @@ function reservedloc_civicrm_buildForm($formName, &$form) {
       $form->removeElement('loc_event_id');
     }
 
+    if (!empty($form->_values['email'])) {
+      foreach ($form->_values['email'] as $key => $data) {
+        unset($form->_values['email'][$key]['id']);
+      }
+      $defaults['email'] = $form->_values['email'];
+    }
+
     // Ensure locUsed is 0, otherwise we get confusing output.
     $form->assign('locUsed', 0);
 
@@ -201,3 +208,4 @@ function reservedloc_civicrm_buildForm($formName, &$form) {
     }
   }
 }
+
