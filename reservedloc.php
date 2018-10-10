@@ -189,11 +189,13 @@ function reservedloc_civicrm_buildForm($formName, &$form) {
       $form->removeElement('loc_event_id');
     }
 
-    if (!empty($form->_values['email'])) {
-      foreach ($form->_values['email'] as $key => $data) {
-        unset($form->_values['email'][$key]['id']);
+    foreach (['email', 'phone'] as $entity) {
+      if (!empty($form->_values[$entity])) {
+        foreach ($form->_values[$entity] as $key => $data) {
+          unset($form->_values[$entity][$key]['id']);
+        }
+        $defaults['email'] = $form->_values['email'];
       }
-      $defaults['email'] = $form->_values['email'];
     }
 
     // Ensure locUsed is 0, otherwise we get confusing output.
